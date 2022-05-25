@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+</head>
+<body>
+	<input type="text" id="file_link" />
+	<input type="file" id="file_name" accept="audio/mp3"/>
+	<input type="submit" id="submit" name="submit" class="btn btn-success btn_submit" value="Add Manage File">
+</body>
+</html>
+<!--Youtube Link Duration-->
+<script>
+	
+	$("#submit").on("click",function(){
+	file_link=	$("#file_link").val();
+	FileArr = file_link.split("watch?v=");
+	if(FileArr[1]!='')
+	{
+		getDuration(FileArr[1]);
+	}
+	});
+// convert ISO 8601 duration
+function formatISODate(youtube_time){
+  array = youtube_time.match(/(\d+)(?=[MHS])/ig)||[]; 
+    var formatted = array.map(function(item){
+        if(item.length<2) return '0'+item;
+        return item;
+    }).join(':');
+    return formatted;
+}
+	function getDuration(id){
+	APIKEY ="AIzaSyAar1chZE5DxauPBpXlVTELjpgcCkkEz_U";//test
+	
+
+
+	  var youtubeUrl = "https://www.googleapis.com/youtube/v3/videos?id=" + id
+        + "&key="+APIKEY+"&part=snippet,contentDetails";
+	 $.ajax({
+            async: false,
+            type: 'GET',
+            url: youtubeUrl,
+            success: function(data) {
+              var youtube_time = data.items[0].contentDetails.duration;
+			   var duration = formatISODate(youtube_time); 
+			  console.log(duration);
+            }
+        });
+		
+	}
+</script>
+<!--Youtube Link Duration END-->
+
+
+
+<!---Duration audio Start--->
+<script>
+
+document.getElementById("file_name").addEventListener('change', function(){
+	var file = this.files[0];
+	console.log(file);
+	let FileArray =file.type.split("/");
+	
+	if(FileArray[0]=="audio")
+	{
+    var reader = new FileReader();
+	reader.onload = function (event) {
+	var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+	audioContext.decodeAudioData(event.target.result, function(buffer) {
+    var duration = buffer.duration;
+
+	var hours = Math.floor(duration / (60 * 60));
+
+var divisor_for_minutes = duration % (60 * 60);
+var minutes = Math.floor(divisor_for_minutes / 60);
+
+var divisor_for_seconds = divisor_for_minutes % 60;
+var seconds = Math.ceil(divisor_for_seconds);
+
+	var minute = Math.floor(duration/60);
+	var rest_seconds = duration%60;
+	if(hours!="0")
+	{
+		$("#duration").val(hours+":"+minute+":"+seconds);
+	}
+	else
+	{
+		$("#duration").val(minute+":"+seconds);
+	}
+	//console.log(hours + "hours"+minute + " minutes " + seconds + " seconds.")
+
+           //console.log("The duration of the song is of: " + duration + " seconds");
+    });
+   };
+
+    reader.onerror = function (event) {
+        console.error("An error ocurred reading the file: ", event);
+    };
+	reader.readAsArrayBuffer(file);	
+	}
+	
+
+}, false);
+</script>
+<!---Duration audio End--->
